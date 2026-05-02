@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Georgia, serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:radial-gradient(circle,#2a0f1d,#0d060a);
+    overflow:hidden;
+    color:white;
+}
+
+/* background glow after opening */
+
+body.opened::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+    radial-gradient(circle,
+    rgba(255,80,140,0.18),
+    transparent 60%);
+}
+
+/* container */
+
+.container{
+    width:90%;
+    max-width:600px;
+    text-align:center;
+    position:relative;
+    z-index:2;
+}
+
+h1{
+    font-size:40px;
+    font-weight:normal;
+    margin-bottom:10px;
+}
+
+.sub{
+    color:#d8b7c7;
+    margin-bottom:20px;
+    line-height:1.6;
+}
+
+/* input */
+
+input{
+    width:240px;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    text-align:center;
+    outline:none;
+    font-size:15px;
+}
+
+button{
+    margin-top:10px;
+    padding:12px 25px;
+    border:none;
+    border-radius:10px;
+    background:#ff4f86;
+    color:white;
+    cursor:pointer;
+    font-size:15px;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+.error{
+    margin-top:10px;
+    height:20px;
+    color:#ffb6cc;
+}
+
+/* envelope wrapper */
+
+.wrapper{
+    display:none;
+    justify-content:center;
+    margin-top:40px;
+    position:relative;
+}
+
+/* envelope */
+
+.envelope{
+    width:320px;
+    height:200px;
+    background:#ff4f86;
+    position:relative;
+    border-radius:10px;
+    cursor:pointer;
+    overflow:visible;
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* flap */
+
+.flap{
+    position:absolute;
+    width:0;
+    height:0;
+
+    border-left:160px solid transparent;
+    border-right:160px solid transparent;
+    border-top:100px solid #ff7aa7;
+
+    top:0;
+    left:0;
+
+    transform-origin:top;
+    transition:1s ease;
+
+    z-index:5;
+}
+
+/* letter */
+
+.letter{
+    position:absolute;
+
+    width:260px;
+    height:320px;
+
+    background:#fffaf7;
+
+    left:30px;
+    top:220px;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    color:#222;
+
+    text-align:left;
+    line-height:1.8;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    white-space:pre-wrap;
+
+    -webkit-overflow-scrolling:touch;
+
+    transition:1.2s ease;
+
+    z-index:2;
+
+    opacity:0;
+
+    box-shadow:0 15px 40px rgba(0,0,0,0.4);
+}
+
+/* open animation */
+
+.open .flap{
+    transform:rotateX(180deg);
+    z-index:1;
+}
+
+.open .letter{
+    top:-120px;
+    opacity:1;
+}
+
+/* typed text */
+
+#typedText{
+    white-space:pre-wrap;
+    line-height:1.8;
+    word-wrap:break-word;
+}
+
+/* cursor */
+
+.cursor{
+    animation:blink .7s infinite;
+    color:#ff4f86;
+}
+
+@keyframes blink{
+    50%{
+        opacity:0;
+    }
+}
+
+/* hearts */
+
+.heart{
+    position:absolute;
+    color:#ff8fb5;
+    pointer-events:none;
+    animation:FloatUp 4s linear forwards;
+}
+
+@keyframes FloatUp{
+
+    0%{
+        transform:translateY(0);
+        opacity:1;
+    }
+
+    100%{
+        transform:translateY(-700px);
+        opacity:0;
+    }
+}
+
+/* shake animation */
+
+.shake{
+    animation:shake 0.4s;
+}
+
+@keyframes shake{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    25%{
+        transform:translateX(-5px);
+    }
+
+    50%{
+        transform:translateX(5px);
+    }
+
+    75%{
+        transform:translateX(-5px);
+    }
+
+    100%{
+        transform:translateX(0);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Who is youuu?</h1>
+
+    <p class="sub">
+        When's your birthdate vivi baho
+    </p>
+
+    <input type="text" id="code" placeholder="enter code">
+
+    <br>
+
+    <button onclick="unlock()">
+        Unlock
+    </button>
+
+    <div class="error" id="error"></div>
+
+    <div class="wrapper" id="wrapper">
+
+        <div class="envelope" id="envelope" onclick="openLetter()">
+
+            <div class="flap"></div>
+
+            <div class="letter">
+
+                <div id="typedText"></div>
+
+                <span class="cursor">|</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const correct = "12/23/2009";
+
+const message = `Dear ViviBaho,
+
+It is probably so obvious by now…
+
+There’s no point on hiding it anymore since you already know, but I still wanted to say it properly—because I find it really, really odd for me, that I haven’t expressed my feelings in a formal manner
+
+I like you. Deeply.
+
+Is it shocking ba? haha…
+
+Well if it shocked you…? That’s shocking for me because I have been so obvious and expressive towards what Ive been feeling towards you. Well, kidding aside I know this confession won’t really change much between us, I just didn’t want my feelings to be unclearly stated and feels unfinished, you deserve to hear them clearly and directly from me
+
+I want it to be clear for you, that I like you and show my real intentions towards you. I want to make sure that I am not showing signals that will make you feel confused on what i’m really feeling
+
+Also, I just dont like the like the idea of liking you — because I do like you. And that’s exactly the reason why I want to know you more, I want to learn the little things you have, thoughts that scares you, things makes you smile, thoughts that keeps you awake when its night time, I wanna know secret things that you are shy to talk about to other people, I want to learn things about you that you think nobody notices.
+
+One more thing, I am not rushing anything, I wanna take our time to know more about each other, I want to be closer to you deeply, naturally and sincerely.`;
+
+let typed = false;
+
+function unlock(){
+
+    const input =
+    document.getElementById("code").value;
+
+    const env =
+    document.getElementById("envelope");
+
+    const wrapper =
+    document.getElementById("wrapper");
+
+    const error =
+    document.getElementById("error");
+
+    if(input === correct){
+
+        wrapper.style.display = "flex";
+
+        env.classList.add("shake");
+
+        setTimeout(() => {
+
+            env.classList.remove("shake");
+
+        },400);
+
+        error.innerHTML = "";
+
+    }else{
+
+        error.innerHTML = "hindi ikaw si vi.";
+    }
+}
+
+function openLetter(){
+
+    const env =
+    document.getElementById("envelope");
+
+    env.classList.add("open");
+
+    document.body.classList.add("opened");
+
+    createHearts();
+
+    if(!typed){
+
+        typed = true;
+
+        typeWriter();
+    }
+}
+
+function typeWriter(){
+
+    let i = 0;
+
+    const text =
+    document.getElementById("typedText");
+
+    function typing(){
+
+        if(i < message.length){
+
+            text.innerHTML +=
+            message.charAt(i);
+
+            i++;
+
+            setTimeout(typing,30);
+        }
+    }
+
+    typing();
+}
+
+function createHearts(){
+
+    for(let i=0;i<30;i++){
+
+        const heart =
+        document.createElement("div");
+
+        heart.classList.add("heart");
+
+        heart.innerHTML = "❤";
+
+        heart.style.left =
+        Math.random() * window.innerWidth + "px";
+
+        heart.style.bottom = "100px";
+
+        heart.style.fontSize =
+        (Math.random() * 18 + 10) + "px";
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+
+            heart.remove();
+
+        },4000);
+    }
+}
+
+</script>
+
+</body>
+</html>
